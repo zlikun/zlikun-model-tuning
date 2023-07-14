@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua
 EXPOSE 5000
 
 # 设置环境变量
-ENV FLASK_APP=app.py
+ENV FLASK_APP=wsgi.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # 启动应用程序
