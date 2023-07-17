@@ -142,7 +142,7 @@ $ pip install -r requirements.txt
 # ==============================================================================
 # 启动模型
 # ==============================================================================
-$ python webui.py --no-remote-model --model-name chatglm2-6b
+$ NUMEXPR_MAX_THREADS=1 python webui.py --no-remote-model --model-name chatglm2-6b
  
 # https://www.codewithgpu.com/i/imClumsyPanda/langchain-ChatGLM/langchain-ChatGLM
 # https://www.autodl.com/docs/ssh_proxy/
@@ -190,6 +190,8 @@ $ NUMEXPR_MAX_THREADS=1 python api.py --no-remote-model --model-name chatglm2-6b
 ```
 # https://huggingface.co/GanymedeNil/text2vec-large-chinese
 
+# 分拆字符串参考 chains/local_doc_qa.py 文件
+# 修改 ChineseTextSplitter 文件，使之符合自定义格式（默认实现可能不太符合需求）
 
 ```
 
