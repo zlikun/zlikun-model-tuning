@@ -234,9 +234,101 @@ $ python open_api.py
 
 ## 微调
 
+### [P-tuning-v2](https://github.com/THUDM/P-tuning-v2)
+
 ```shell
+# https://github.com/THUDM/ChatGLM2-6B/blob/main/ptuning/README.md
+
+# 准备数据，将数据文件复制到指定目录
+# 数据生成过程参考 ChatGLM.ipynb 文件
+
 # 安装依赖
 $ pip install rouge_chinese nltk jieba datasets
 
+# P-Tuning-v2 方法会冻结全部的模型参数
+# 修改 ChatGLM2-6B/ptuning/train.sh 和 ChatGLM2-6B/ptuning/evaluate.sh 脚本，准备微调
+# PRE_SEQ_LEN - 设置 soft prompt 长度
+# LR - 设置训练的学习率
+# quantization_bit - 设置量化精度，默认为 FP16 精度
+
+# 将准备好的微调数据放在指定位置，执行微调命令，注意：需要进入 ptuning 目录执行命令，否则可能会报找不到 main.py 文件的错误
+$ cd ptuning
+$ bash train.sh
+
+# 验证模型
+$ bash evaluate.sh
+
+# 观察 GPU 使用情况
+$ watch -n 2 nvidia-smi
+
+# Q&A
+# ImportError: Using the `Trainer` with `PyTorch` requires `accelerate>=0.20.1`: Please run `pip install transformers[torch]` or `pip install accelerate -U`
+$ pip install transformers[torch]
+
+```
+
+脚本 train.sh 说明
+
+```shell
+PRE_SEQ_LEN=128
+LR=2e-2
+NUM_GPUS=1
+
+torchrun --standalone --nnodes=1 --nproc-per-node=$NUM_GPUS main.py \
+    --do_train \
+    --train_file /root/autodl-tmp/ptunning/train.json \
+    --validation_file /root/autodl-tmp/ptunning/dev.json \
+    --preprocessing_num_workers 10 \
+    --prompt_column content \
+    --response_column summary \
+    --overwrite_cache \
+    --model_name_or_path /root/autodl-tmp/model/chatglm2-6b \
+    --output_dir /root/autodl-tmp/output/adgen-chatglm2-6b-pt-$PRE_SEQ_LEN-$LR \
+    --overwrite_output_dir \
+    --max_source_length 64 \
+    --max_target_length 128 \
+    --per_device_train_batch_size 1 \
+    --per_device_eval_batch_size 1 \
+    --gradient_accumulation_steps 16 \
+    --predict_with_generate \
+    --max_steps 3000 \
+    --logging_steps 10 \
+    # 机器学习中，指定在多少步之后保存模型的检查点，以便将来从这些检查点恢复训练，或者用来做模型评估
+    --save_steps 1000 \
+    # 学习率 (Learning Rate)
+    --learning_rate $LR \
+    # Soft Prompt 长度
+    --pre_seq_len $PRE_SEQ_LEN \
+    # 量化精度，不加该参数时为 FP16，int4是指4位整数（0~15, -7~8），FP16表示半精度浮点数
+    # 使用"int4"可以减少模型的存储需求和计算复杂性，但可能会导致一些精度损失；而使用"fp16"则可以保持较高的精度，但需要更多的存储空间和计算资源
+    --quantization_bit 4
+
+```
+
+脚本 evaluate.sh 说明
+
+```shell
+PRE_SEQ_LEN=128
+CHECKPOINT=adgen-chatglm2-6b-pt-128-2e-2
+STEP=3000
+NUM_GPUS=1
+
+torchrun --standalone --nnodes=1 --nproc-per-node=$NUM_GPUS main.py \
+    --do_predict \
+    --validation_file /root/autodl-tmp/ptunning/dev.json \
+    --test_file /root/autodl-tmp/ptunning/dev.json \
+    --overwrite_cache \
+    --prompt_column content \
+    --response_column summary \
+    --model_name_or_path /root/autodl-tmp/model/chatglm2-6b \
+    --ptuning_checkpoint /root/autodl-tmp/output/$CHECKPOINT/checkpoint-$STEP \
+    --output_dir /root/autodl-tmp/output/$CHECKPOINT \
+    --overwrite_output_dir \
+    --max_source_length 64 \
+    --max_target_length 64 \
+    --per_device_eval_batch_size 1 \
+    --predict_with_generate \
+    --pre_seq_len $PRE_SEQ_LEN \
+    --quantization_bit 4
 
 ```
