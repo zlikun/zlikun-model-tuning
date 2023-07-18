@@ -195,11 +195,48 @@ $ NUMEXPR_MAX_THREADS=1 python api.py --no-remote-model --model-name chatglm2-6b
 
 ```
 
-### LangChain
+## LangChain
 
 ```
 # 参考实现
 # https://github.com/imClumsyPanda/langchain-ChatGLM/blob/master/chains/local_doc_qa.py
+
+
+```
+
+## ChatGLM2-6B
+
+> 使用原生模型服务
+
+```shell
+# 下载模型源码
+$ git clone https://github.com/THUDM/ChatGLM2-6B.git
+
+# 安装依赖
+$ pip install -r requirements.txt
+
+# 下载模型，并将 api / web / open_api 等路径调整为本地路径
+
+# 其它启动方式
+$ python cli_demo.py
+
+# 测试方法参见 ChatGLM.http 文件
+$ python api.py
+
+# 使用 gradio 实现，可以通过命令行，也可以通过环境变量或代码指定端口
+$ GRADIO_SERVER_PORT=6006 python web_demo.py
+
+# 使用类 openai API启动模型 - 仅支持 Chat Completions API 
+# 测试用例参见 ChatGLM.http 文件
+$ python open_api.py
+
+```
+
+## 微调
+
+```shell
+# 安装依赖
+$ pip install rouge_chinese nltk jieba datasets
 
 
 ```

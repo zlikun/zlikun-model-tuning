@@ -1,0 +1,27 @@
+### ChatGLM2-6B api.py
+POST https://u133096-8050-da7f0768.neimeng.seetacloud.com:6443/
+Content-Type: application/json
+
+{
+    "prompt": "怎样对ChatGLM2-6B进行微调？",
+    "history": [],
+    "max_length": 128,
+    "top_p": 4,
+    "temperature": 0.3
+}
+
+
+# https://platform.openai.com/docs/api-reference
+### ChatGLM2-6B openai_api.py
+GET https://u133096-8050-da7f0768.neimeng.seetacloud.com:6443/v1/models
+
+### Chat Completions
+POST https://u133096-8050-da7f0768.neimeng.seetacloud.com:6443/v1/chat/completions
+Content-Type: application/json
+
+{
+    "model": "chatglm2-6b",
+    "messages": [{"role": "system", "content": "你是一名资深中英文翻译专家，请翻译接下来的每一句话"}, {"role": "user", "content": "我喜欢编程"}],
+    "max_tokens": 128,
+    "temperature": 0.3
+}
